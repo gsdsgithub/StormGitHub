@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>خريطة ArcGIS مع أدوات البحث والتحكم في الطبقات</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <style>
+      html, body, #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+    <script>
+      require([
+        "esri/views/MapView",
+        "esri/WebMap",
+        "esri/widgets/Search",
+        "esri/widgets/LayerList"
+      ], function(MapView, WebMap, Search, LayerList) {
+        const webmap = new WebMap({
+          portalItem: {
+            id: "310a31d8e76040258fc9309c473cb1f9"
+          }
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: webmap
+        });
+
+        view.when(() => {
+          const targetLayer = webmap.layers.find(layer => layer.title.includes("الرقم الموحد") || layer.title.includes("Unified") || layer.title.includes("parcel"));
+
+          const searchWidget = new Search({
+            view: view,
+            includeDefaultSources: true,
+            sources: targetLayer ? [{
+              layer: targetLayer,
+              searchFields: ["رقم_موحد", "unified_id", "parcel_no"],
+              displayField: "رقم_موحد",
+              exactMatch: false,
+              outFields: ["*"],
+              name: "البحث حسب الرقم الموحد",
+              placeholder: "أدخل الرقم الموحد"
+            }] : []
+          });
+
+          view.ui.add(searchWidget, {
+            position: "top-right",
+            index: 0
+          });
+
+          const layerList = new LayerList({
+            view: view
+          });
+
+          view.ui.add(layerList, {
+            position: "top-right"
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
